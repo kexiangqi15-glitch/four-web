@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="为高中英语约125分学生定制的CET-4高价值词汇手册：1800词，60天完成。">
+  <meta name="theme-color" content="#17324d">
+  <title>四级跃迁 · CET-4 Leap</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="topbar">
+    <button class="brand" data-route="home" aria-label="返回首页">
+      <span class="brand-mark">4</span>
+      <span><strong>四级跃迁</strong><small>CET-4 LEAP · 高中125分进阶版</small></span>
+    </button>
+    <nav class="top-actions" aria-label="快捷功能">
+      <button id="favoritesBtn" class="icon-btn" title="收藏词汇">☆ <span>收藏</span></button>
+      <button id="themeBtn" class="icon-btn" title="切换深浅色">◐ <span>主题</span></button>
+    </nav>
+  </header>
+
+  <main id="main" tabindex="-1">
+    <section id="loading" class="loading"><span class="spinner"></span><p>正在打开词汇手册……</p></section>
+    <section id="errorView" class="error-panel hidden" role="alert">
+      <h1>词库没有加载成功</h1>
+      <p>请确认 <code>data/vocabulary.json</code> 已上传。若直接双击本地文件，请改用部署后的GitHub Pages网址。</p>
+    </section>
+    <div id="app" class="hidden"></div>
+  </main>
+
+  <button id="backToTop" class="back-top" aria-label="返回顶部">↑</button>
+  <footer>
+    <p>进度仅保存在当前浏览器；清除浏览器数据或更换设备会重置。</p>
+    <p>词条保留英式IPA；点击 🔊 可播放浏览器提供的美式英语发音。</p>
+    <p><a href="README.md">教材说明</a> · <a href="DEPLOY.md">部署指南</a> · <a href="volumes/01-units-01-10.md">Markdown教材</a></p>
+  </footer>
+  <script src="assets/app.js" defer></script>
+</body>
+</html>
