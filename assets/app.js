@@ -95,6 +95,8 @@ function renderRoute(scroll=true){
   const r=parseRoute();
   if(r==='home') return renderHome();
   if(r==='favorites') return renderFavorites();
+  if(r==='words') return renderEnglishUnit(1);
+  if(r.startsWith('words-')) return renderEnglishUnit(Number(r.split('-')[1]));
   if(r.startsWith('unit-')) return renderUnit(Number(r.split('-')[1]));
   if(r.startsWith('quiz-')) return renderUnitQuiz(Number(r.split('-')[1]));
   if(r.startsWith('review-')) return renderAssessment('review',Number(r.split('-')[1]));
@@ -143,6 +145,22 @@ function renderUnit(id){
   const u=unitById(id); if(!u)return renderHome();
   shell(`<div class="page-head"><div><div class="eyebrow">第 ${Math.ceil(id/10)} 卷 · Day ${id}</div><h1>Unit ${id}</h1><p>30词 · 难度 ${u.difficulty}/5 · 已掌握 <span data-master-count>${u.words.filter(w=>state.mastered.includes(w.id)).length}</span>/30</p></div><div class="page-tools"><button class="ghost" data-route="home">首页</button><button class="secondary" data-route="quiz-${id}">今日在线练习</button><button class="primary" id="completeUnit">${state.completed.includes(id)?'已完成 ✓':'完成本Unit'}</button></div></div><div class="word-grid">${u.words.map(w=>wordCard(w)).join('')}</div><div class="pager"><button class="ghost" ${id===1?'disabled':''} data-unit="${Math.max(1,id-1)}">← 上一Unit</button><button class="ghost" ${id===60?'disabled':''} data-unit="${Math.min(60,id+1)}">下一Unit →</button></div>`);
   document.querySelector('#completeUnit').addEventListener('click',()=>{toggleList('completed',id);renderUnit(id)});
+  const englishButton=document.createElement('button');
+  englishButton.className='ghost';englishButton.dataset.route=`words-${id}`;englishButton.textContent='纯英文回忆';
+  document.querySelector('.page-tools').prepend(englishButton);
+}
+
+function renderEnglishUnit(id){
+  const u=unitById(id);if(!u)return renderHome();
+  shell(`<div class="page-head"><div><div class="eyebrow">English only · Day ${id}</div><h1>Unit ${id}</h1><p>看英文，在心里回忆中文意思，无需拼写。</p></div><div class="page-tools"><label>切换单元 <select id="englishUnitSelect" aria-label="切换纯英文单元">${book.units.map(unit=>`<option value="${unit.id}" ${unit.id===id?'selected':''}>Unit ${unit.id}</option>`).join('')}</select></label><button class="ghost" data-route="unit-${id}">对照词义</button><button class="secondary" id="shuffleEnglish">打乱顺序</button></div></div><div id="englishWords" class="word-grid"></div><div class="pager"><button class="ghost" ${id===1?'disabled':''} data-route="words-${id-1}">← 上一Unit</button><button class="ghost" data-route="home">首页</button><button class="ghost" ${id===60?'disabled':''} data-route="words-${id+1}">下一Unit →</button></div>`);
+  let words=[...u.words];
+  const draw=()=>{document.querySelector('#englishWords').innerHTML=words.map(w=>`<article class="word-card"><div class="word-top"><div class="word-title"><h3 lang="en">${esc(w.word)}</h3></div><button class="round-btn audio-btn" data-speak="${esc(w.word)}" title="播放美式发音" aria-label="播放 ${esc(w.word)} 的美式发音">🔊</button></div></article>`).join('')};
+  draw();
+  document.querySelector('#englishUnitSelect').addEventListener('change',e=>route(`words-${e.target.value}`));
+  document.querySelector('#shuffleEnglish').addEventListener('click',()=>{
+    for(let i=words.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[words[i],words[j]]=[words[j],words[i]]}
+    draw();
+  });
 }
 
 function renderUnitQuiz(id){
@@ -186,6 +204,7 @@ function renderFavorites(){
 
 document.querySelector('#themeBtn').addEventListener('click',()=>{state.theme=state.theme==='dark'?'light':'dark';saveState()});
 document.querySelector('#favoritesBtn').addEventListener('click',()=>route('favorites'));
+document.querySelector('#englishBtn').addEventListener('click',()=>{const current=parseRoute().match(/^(?:unit|quiz|words)-(\d+)$/);route(`words-${current?current[1]:1}`)});
 document.querySelector('.brand').addEventListener('click',()=>route('home'));
 const topBtn=document.querySelector('#backToTop');window.addEventListener('scroll',()=>topBtn.classList.toggle('show',scrollY>500));topBtn.addEventListener('click',()=>scrollTo({top:0,behavior:'smooth'}));
 updateTheme();
