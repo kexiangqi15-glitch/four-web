@@ -1,4 +1,4 @@
-const DATA_URL = 'data/vocabulary.json?v=20260930';
+const DATA_URL = 'data/vocabulary.json?v=20260930-2';
 const STORAGE_KEY = 'cet4_125_handbook_v1';
 const app = document.querySelector('#app');
 let book;
