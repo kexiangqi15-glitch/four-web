@@ -1,4 +1,4 @@
-const DATA_URL = 'data/vocabulary.json';
+const DATA_URL = 'data/vocabulary.json?v=20260930';
 const STORAGE_KEY = 'cet4_125_handbook_v1';
 const app = document.querySelector('#app');
 let book;
@@ -119,6 +119,7 @@ function renderHome(){
   <section><div class="section-head"><div><h2>六卷教材</h2><p>每卷10个Unit、300词</p></div></div><div class="volume-grid">${volumes}</div></section>
   <section><div class="section-head"><div><h2>60天路线</h2><p>绿色表示已完成</p></div></div><div class="unit-grid">${units}</div></section>
   <section><div class="section-head"><div><h2>综合复习与测试</h2><p>每7天复习，每14天测试</p></div><button class="secondary" data-route="test-60">第60天结业测试</button></div><div class="milestone-grid">${milestones}</div></section>`);
+  document.querySelector('#posFilter').insertAdjacentHTML('beforeend','<option>conj.</option>');
   setupSearch();
 }
 
@@ -128,7 +129,7 @@ function setupSearch(){
     const q=controls[0].value.trim().toLowerCase(),unit=controls[1].value,pos=controls[2].value,diff=controls[3].value;
     if(!q&&!unit&&!pos&&!diff){document.querySelector('#searchResults').innerHTML='';document.querySelector('#searchMeta').textContent='输入内容即可搜索；最多同时显示100项。';return}
     const found=allWords().filter(w=>{
-      const hay=[w.word,w.core,w.focus,...w.collocations.flatMap(x=>[x.en,x.zh]),...w.fixedPhrases.flatMap(x=>[x.en,x.zh])].join(' ').toLowerCase();
+      const hay=[w.word,w.core,...arr(w.meanings),w.focus,...w.collocations.flatMap(x=>[x.en,x.zh]),...w.fixedPhrases.flatMap(x=>[x.en,x.zh])].join(' ').toLowerCase();
       return (!q||hay.includes(q))&&(!unit||String(Math.ceil(w.id/30))===unit)&&(!pos||w.pos===pos)&&(!diff||String(w.difficulty)===diff)
     });
     document.querySelector('#searchMeta').textContent=`找到 ${found.length} 项${found.length>100?'，显示前100项':''}`;
@@ -138,7 +139,7 @@ function setupSearch(){
 
 function wordCard(w,compact=false){
   const mastered=state.mastered.includes(w.id),fav=state.favorites.includes(w.id);
-  return `<article class="word-card ${mastered?'mastered':''}" id="word-${w.id}"><div class="word-top"><div class="word-title"><h3>${esc(w.word)}</h3><div class="ipa">${esc(w.ipa)} · ${esc(w.pos)}</div></div><div class="word-actions"><button class="round-btn audio-btn" data-speak="${esc(w.word)}" title="播放美式发音" aria-label="播放 ${esc(w.word)} 的美式发音">🔊</button><button class="round-btn ${fav?'active':''}" data-favorite="${w.id}" title="${fav?'取消收藏':'收藏'}" aria-pressed="${fav}">${fav?'★':'☆'}</button><button class="round-btn ${mastered?'active':''}" data-master="${w.id}" title="${mastered?'取消掌握':'标为掌握'}" aria-pressed="${mastered}">${mastered?'✓':'○'}</button></div></div><div class="badges"><span class="badge">${esc(w.category)}</span><span class="badge">难度 ${w.difficulty}</span></div><div class="core">${esc(w.core)}</div>${compact?`<p><button class="ghost" data-unit="${Math.ceil(w.id/30)}">查看所在Unit</button></p>`:`<details><summary>展开四级重点与用法</summary><div class="detail-list"><div class="detail-row"><b>四级重点</b>${esc(w.focus)}</div><div class="detail-row"><b>常见搭配</b>${pairs(w.collocations,'暂无可靠高频搭配')}</div><div class="detail-row"><b>固定短语</b>${pairs(w.fixedPhrases,'无常用固定短语，重点记搭配')}</div><div class="detail-row"><b>高频近义词</b>${pairs(w.synonyms,'无常用直接近义词')}</div><div class="detail-row"><b>高频反义词</b>${pairs(w.antonyms,'无常用对应反义词')}</div><div class="example"><b>长难句例句</b><p>${esc(w.example.en)}</p><p>${esc(w.example.zh)}</p></div><div class="memory"><b>记忆</b> ${esc(w.memory)}</div></div></details>`}</article>`
+  return `<article class="word-card ${mastered?'mastered':''}" id="word-${w.id}"><div class="word-top"><div class="word-title"><h3>${esc(w.word)}</h3><div class="ipa">${esc(w.ipa)} · ${esc(w.pos)}</div></div><div class="word-actions"><button class="round-btn audio-btn" data-speak="${esc(w.word)}" title="播放美式发音" aria-label="播放 ${esc(w.word)} 的美式发音">🔊</button><button class="round-btn ${fav?'active':''}" data-favorite="${w.id}" title="${fav?'取消收藏':'收藏'}" aria-pressed="${fav}">${fav?'★':'☆'}</button><button class="round-btn ${mastered?'active':''}" data-master="${w.id}" title="${mastered?'取消掌握':'标为掌握'}" aria-pressed="${mastered}">${mastered?'✓':'○'}</button></div></div><div class="badges"><span class="badge">${esc(w.category)}</span><span class="badge">难度 ${w.difficulty}</span></div><div class="core">${esc(arr(w.meanings).length?w.meanings.join('；'):w.core)}</div>${compact?`<p><button class="ghost" data-unit="${Math.ceil(w.id/30)}">查看所在Unit</button></p>`:`<details><summary>展开四级重点与用法</summary><div class="detail-list"><div class="detail-row"><b>四级重点</b>${esc(w.focus)}</div><div class="detail-row"><b>常见搭配</b>${pairs(w.collocations,'暂无可靠高频搭配')}</div><div class="detail-row"><b>固定短语</b>${pairs(w.fixedPhrases,'无常用固定短语，重点记搭配')}</div><div class="detail-row"><b>高频近义词</b>${pairs(w.synonyms,'无常用直接近义词')}</div><div class="detail-row"><b>高频反义词</b>${pairs(w.antonyms,'无常用对应反义词')}</div><div class="example"><b>长难句例句</b><p>${esc(w.example.en)}</p><p>${esc(w.example.zh)}</p></div><div class="memory"><b>记忆</b> ${esc(w.memory)}</div></div></details>`}</article>`
 }
 
 function renderUnit(id){
@@ -185,9 +186,11 @@ function renderQuizPage(title,questions,back,key){
     e.preventDefault();
     questions.forEach((q,i)=>{
       const box=form.querySelector(`[data-q="${i}"]`),input=box.querySelector('input'),answer=box.querySelector('.answer');
-      const ok=q.type==='英译中'?chineseMeaningCorrect(input.value,q.answer):normalize(input.value)===normalize(q.answer);
+      const entry=q.type==='英译中'?allWords().find(w=>w.word===q.prompt):null;
+      const accepted=entry&&arr(entry.meanings).length?entry.meanings.join('；'):q.answer;
+      const ok=q.type==='英译中'?chineseMeaningCorrect(input.value,accepted):normalize(input.value)===normalize(q.answer);
       results[i]=ok;box.classList.remove('correct','wrong');box.classList.add(ok?'correct':'wrong');answer.classList.remove('hidden');
-      answer.innerHTML=ok?'正确 ✓':`参考答案：${esc(q.answer)} <button class="self-check" type="button" data-accept-q="${i}">我的意思正确，改判</button>`;
+      answer.innerHTML=ok?'正确 ✓':`参考答案：${esc(accepted)} <button class="self-check" type="button" data-accept-q="${i}">我的意思正确，改判</button>`;
     });
     updateScore();window.scrollTo({top:0,behavior:'smooth'});
   });
